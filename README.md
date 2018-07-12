@@ -13,5 +13,5 @@ This display is useful for configuration of mods that need TileEntity registrati
 ![TileEntity on debug screen](other/screenshots/debugscreen-tileentity.png)
 TileEntity on debug screen
 
-![oreDict tooltip](other/screenships/tooltip-oredict.png)
+![oreDict tooltip](other/screenshots/tooltip-oredict.png)
 oreDict entries on advanced tooltip for an item
