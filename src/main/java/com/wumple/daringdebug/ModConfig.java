@@ -7,14 +7,20 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-// Disabling for now since mod has no config options
-//@Config(modid = Reference.MOD_ID)
+@Config(modid = Reference.MOD_ID)
 @Mod.EventBusSubscriber(modid = Reference.MOD_ID)
 public class ModConfig
 {
+	@Name("TileEntity on debug screen")
+	@Config.Comment("Show TileEntity name on debug screen for block under cursor")
+	public static boolean tileEntityDebug = true;
+	
+	@Name("OreDict advanced tooltips")
+	@Config.Comment("Show OreDict entries for ItemStack in advanced tooltips")
+	public static boolean oreDictTooltips = true;
 
-    @Name("Debugging")
-    @Config.Comment("Debugging options")
+    @Name("Mod debugging")
+    @Config.Comment("Mod debugging options")
     public static Debugging zdebugging = new Debugging();
 
     public static class Debugging
