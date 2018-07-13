@@ -2,6 +2,8 @@ package com.wumple.daringdebug;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -22,10 +24,18 @@ public class CustomDebug
 
    @SubscribeEvent(priority = EventPriority.HIGH)
    static public void onDrawOverlay(final RenderGameOverlayEvent.Text e)
-   {
-	   if ((mc.gameSettings.showDebugInfo == true) && (ModConfig.tileEntityDebug == true))
+   { 
+	   if (mc.gameSettings.showDebugInfo == true)
 	   {
-		   addTileEntityDebug(e);
+		   if (ModConfig.tileEntityDebug == true)
+		   {
+			   addTileEntityDebug(e);
+		   }
+
+		   if (ModConfig.entityDebug == true)
+		   {
+			   addEntityDebug(e);
+		   }
 	   }
    }
 
@@ -45,9 +55,29 @@ public class CustomDebug
            {
         	   e.getRight().add(I18n.format("daringdebug.tileentity", key));
            }
-       }	   
+       }
    }
    
+   /*
+    * Add Entity debug text to debug screen if looking at an Entity
+    */
+   public static void addEntityDebug(RenderGameOverlayEvent.Text e)
+   {    
+       // entity
+       if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY && mc.objectMouseOver.entityHit != null)
+       {
+    	   Entity entity = mc.objectMouseOver.entityHit;
+    	   String name = (entity == null) ? null : EntityList.getEntityString(entity);
+           if (name != null)
+           {
+        	   e.getRight().add(I18n.format("daringdebug.entity", name));
+           }
+       }
+   }
+   
+   /*
+    * Add ore dictionary debug text to advanced tooltips
+    */   
    @SubscribeEvent
    public static void addOreDictTooltips(ItemTooltipEvent event)
    {

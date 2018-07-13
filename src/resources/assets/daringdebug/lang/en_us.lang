@@ -1,4 +1,5 @@
 language.name=English
 daringdebug.tileentity=TileEntity: %s
+daringdebug.entity=Entity: %s
 misc.daringdebug.tooltip.advanced.oredict.header=OreDict:
 misc.daringdebug.tooltip.advanced.oredict.entry= * §6%s§r

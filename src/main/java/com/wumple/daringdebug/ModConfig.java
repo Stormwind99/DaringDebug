@@ -15,10 +15,15 @@ public class ModConfig
 	@Config.Comment("Show TileEntity name on debug screen for block under cursor")
 	public static boolean tileEntityDebug = true;
 	
+	@Name("Entity on debug screen")
+	@Config.Comment("Show Entity name on debug screen for entity under cursor")
+	public static boolean entityDebug = true;
+	
 	@Name("OreDict advanced tooltips")
 	@Config.Comment("Show OreDict entries for ItemStack in advanced tooltips")
 	public static boolean oreDictTooltips = true;
 
+	/*
     @Name("Mod debugging")
     @Config.Comment("Mod debugging options")
     public static Debugging zdebugging = new Debugging();
@@ -29,6 +34,7 @@ public class ModConfig
         @Config.Comment("Enable debug features on this menu, display extra debug info.")
         public boolean debug = false;
     }
+    */
     
     @Mod.EventBusSubscriber(modid = Reference.MOD_ID)
     private static class EventHandler
