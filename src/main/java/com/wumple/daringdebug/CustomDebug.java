@@ -1,5 +1,6 @@
 package com.wumple.daringdebug;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
@@ -36,6 +37,11 @@ public class CustomDebug
 		   {
 			   addEntityDebug(e);
 		   }
+		   
+		   if (ModConfig.oreDictDebug == true)
+		   {
+			   addOreDictBlockDebug(e);
+		   }
 	   }
    }
 
@@ -53,7 +59,42 @@ public class CustomDebug
            String key = (loc == null) ? null : loc.toString();
            if (key != null)
            {
-        	   e.getRight().add(I18n.format("daringdebug.tileentity", key));
+        	   e.getRight().add(I18n.format("misc.daringdebug.debug.tileentity", key));
+           }
+       }
+   }
+   
+   /*
+    * Add ore dictionary debug text to debug screen
+    */  
+   public static void addOreDictBlockDebug(RenderGameOverlayEvent.Text e)
+   {         
+       // tile entity
+       if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK && mc.objectMouseOver.getBlockPos() != null)
+       {
+           BlockPos blockpos = (mc.objectMouseOver == null) ? null : mc.objectMouseOver.getBlockPos();
+           Block block = (blockpos == null) ? null : mc.world.getBlockState(blockpos).getBlock();
+
+           int[] ids = (block != null) ? OreDictionary.getOreIDs(new ItemStack(block, 1)) : new int[0];
+
+		   String key = null;
+		   for (int id : ids)
+		   {
+			   String name = OreDictionary.getOreName(id);
+			   if (key == null)
+			   {
+				   key = name;
+			   }
+			   else
+			   {
+				   key = key.concat(" ");
+				   key = key.concat(name);
+			   }
+		   }
+           
+           if (key != null)
+           {
+        	   e.getRight().add(I18n.format("misc.daringdebug.debug.oredict.block", key));
            }
        }
    }
@@ -70,7 +111,7 @@ public class CustomDebug
     	   String name = (entity == null) ? null : EntityList.getEntityString(entity);
            if (name != null)
            {
-        	   e.getRight().add(I18n.format("daringdebug.entity", name));
+        	   e.getRight().add(I18n.format("misc.daringdebug.debug.entity", name));
            }
        }
    }
