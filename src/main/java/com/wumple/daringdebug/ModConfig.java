@@ -25,7 +25,7 @@ public class ModConfig
 	
 	@Name("Capabilities debugging")
 	@Config.Comment("Show capabilities on advanced tooltips and debug screen for thing under cursor")
-	public static boolean capabilitiesDebug = true;
+	public static boolean capabilitiesDebug = false;
 
 	/*
     @Name("Mod debugging")

@@ -1,19 +1,29 @@
 package com.wumple.daringdebug;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import com.google.common.collect.ObjectArrays;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.common.capabilities.CapabilityDispatcher;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -23,29 +33,19 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 @Mod.EventBusSubscriber(modid = Reference.MOD_ID)
 public class CapabilityDebug
 {
-    static final Minecraft mc = Minecraft.getMinecraft();
-    
+    protected static final Minecraft mc = Minecraft.getMinecraft();
+
     /*
      * Reflection Fields for private capability class fields
      */
-    public static final Field itemStackCapabilities;
-    public static final Field entityCapabilities;
-    public static final Field tileEntityCapabilities;
-    public static final Field chunkCapabilities;
-    public static final Field worldCapabilities;
-    public static final Field capNames;
+    protected static final Field capProviders;
 
     /*
      * Look up the reflection Fields we need
      */
     static
     {
-        itemStackCapabilities = ReflectionHelper.findField(ItemStack.class, new String[] { "capabilities"} );
-        entityCapabilities = ReflectionHelper.findField(Entity.class, new String[] { "capabilities"} );
-        tileEntityCapabilities = ReflectionHelper.findField(TileEntity.class, new String[] { "capabilities"} );
-        chunkCapabilities = ReflectionHelper.findField(Chunk.class, new String[] { "capabilities"} );
-        worldCapabilities = ReflectionHelper.findField(World.class, new String[] { "capabilities"} );
-        capNames = ReflectionHelper.findField(CapabilityDispatcher.class, new String[] { "names" } );
+        capProviders = ReflectionHelper.findField(CapabilityManager.class, new String[] { "providers" });
     }
 
     /*
@@ -72,167 +72,107 @@ public class CapabilityDebug
         if (event.getFlags().isAdvanced() && (ModConfig.capabilitiesDebug == true))
         {
             ItemStack stack = event.getItemStack();
-            try
-            {
-                if (stack != null)
-                {
-                    Object field = itemStackCapabilities.get(stack);
-                    if (field != null)
-                    {
-                        CapabilityDispatcher capabilities = (CapabilityDispatcher) field;
-                        Object namesField = capNames.get(capabilities);
-                        if (namesField != null)
-                        {
-                            String names[] = (String[]) namesField;
-
-                            for (String name : names)
-                            {
-                                event.getToolTip()
-                                        .add(new TextComponentTranslation("misc.daringdebug.tooltip.advanced.capability.entry", name).getUnformattedText());
-                            }
-                        }
-                    }
-                }
-            }
-            catch (IllegalArgumentException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (IllegalAccessException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            forEachCap(stack, name -> {event.getToolTip().add(new TextComponentTranslation("misc.daringdebug.tooltip.advanced.capability.entry", name).getUnformattedText());} );
         }
+
     }
 
     public static void addCapTileEntityDebug(RenderGameOverlayEvent.Text event)
     {
-        // tile entity
         if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK && mc.objectMouseOver.getBlockPos() != null)
         {
             BlockPos blockpos = (mc.objectMouseOver == null) ? null : mc.objectMouseOver.getBlockPos();
             TileEntity te = (blockpos == null) ? null : mc.world.getTileEntity(blockpos);
-
-            try
-            {
-                if (te != null)
-                {
-                    Object field = tileEntityCapabilities.get(te);
-                    addToDebugScreen((CapabilityDispatcher) field, "misc.daringdebug.debug.capabilities.tileentity", event);
-                }
-
-            }
-            catch (IllegalArgumentException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (IllegalAccessException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            addCapsToDebugScreen(te, "misc.daringdebug.debug.capabilities.tileentity", event);
         }
+
     }
 
     public static void addCapChunkDebug(RenderGameOverlayEvent.Text event)
     {
-            Chunk chunk = mc.world.getChunkFromBlockCoords(mc.player.getPosition());
-                    
-            try
-            {
-                if (chunk != null)
-                {
-                    Object field = chunkCapabilities.get(chunk);
-                    addToDebugScreen((CapabilityDispatcher) field, "misc.daringdebug.debug.capabilities.chunk", event);
-                }
-
-            }
-            catch (IllegalArgumentException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (IllegalAccessException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        
+        Chunk chunk = mc.world.getChunkFromBlockCoords(mc.player.getPosition());
+        addCapsToDebugScreen(chunk, "misc.daringdebug.debug.capabilities.chunk", event);
     }
-    
+
     public static void addCapEntityDebug(RenderGameOverlayEvent.Text event)
     {
-        // entity
         if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY && mc.objectMouseOver.entityHit != null)
         {
             Entity entity = mc.objectMouseOver.entityHit;
-
-            try
-            {
-                if (entity != null)
-                {
-                    Object field = entityCapabilities.get(entity);
-                    addToDebugScreen((CapabilityDispatcher) field, "misc.daringdebug.debug.capabilities.entity", event);
-                }
-
-            }
-            catch (IllegalArgumentException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (IllegalAccessException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            addCapsToDebugScreen(entity, "misc.daringdebug.debug.capabilities.entity", event);
         }
     }
-    
+
     public static void addCapWorldDebug(RenderGameOverlayEvent.Text event)
     {
         World world = mc.world;
-            try
-            {
-                if (world != null)
-                {
-                    Object field = worldCapabilities.get(world);
-                    addToDebugScreen((CapabilityDispatcher) field, "misc.daringdebug.debug.capabilities.world", event);
-                }
+        addCapsToDebugScreen(world, "misc.daringdebug.debug.capabilities.world", event);
+    }
 
-            }
-            catch (IllegalArgumentException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (IllegalAccessException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        
+    protected static void addCapsToDebugScreen(ICapabilityProvider stack, String lockey, RenderGameOverlayEvent.Text event)
+    {
+        forEachCap(stack, name -> event.getRight().add(I18n.format(lockey, name)) );
     }
     
-    protected static void addToDebugScreen(CapabilityDispatcher capabilities, String lockey, RenderGameOverlayEvent.Text event) throws IllegalArgumentException, IllegalAccessException
+    @SuppressWarnings("unchecked")
+    protected static void forEachCap(ICapabilityProvider stack, Consumer<String> block)
     {
-        if (capabilities != null)
+        try
         {
-            Object namesField = capNames.get(capabilities);
-            if (namesField != null)
+            if (stack != null)
             {
-                String names[] = (String[]) namesField;
+                Object field = capProviders.get(CapabilityManager.INSTANCE);
+                IdentityHashMap<String, Capability<?>> providers = (IdentityHashMap<String, Capability<?>>) field;
 
-                for (String name : names)
+                if (providers != null)
                 {
-                    event.getRight().add(I18n.format("misc.daringdebug.debug.capabilities.tileentity", name));
+                    for (Iterator<Map.Entry<String, Capability<?>>> entries = providers.entrySet().iterator(); entries.hasNext();)
+                    {
+                        Map.Entry<String, Capability<?>> entry = entries.next();
+
+                        // check null + 6 actual facings
+                        EnumFacing[] nullfacing = { null };
+                        EnumFacing[] facings = ObjectArrays.concat(nullfacing, EnumFacing.VALUES, EnumFacing.class); 
+
+                        String facingsString = null;
+                        
+                        // iterate through all facings, checking for cap from each one
+                        for (EnumFacing facing : facings)
+                        {
+                            if (stack.hasCapability(entry.getValue(), facing))
+                            {
+                                // build facings sting for more compact output (fewer lines)
+                                if (facingsString == null)
+                                {
+                                    facingsString = new String();
+                                }
+                                
+                                if (facing == null)
+                                {
+                                    facingsString += "0";
+                                }
+                                else
+                                {
+                                    facingsString += facing.getName2().charAt(0);;
+                                }                        
+                            }
+                        }
+                        
+                        // if any facing had the cap, then do it
+                        if (facingsString != null)
+                        {
+                            String name = entry.getKey() + ":" + facingsString;
+                            block.accept(name);
+                        }
+                    }
                 }
             }
         }
-    }
+        catch (IllegalArgumentException | IllegalAccessException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-    // TODO: World and Chunk?
+    }
 }
