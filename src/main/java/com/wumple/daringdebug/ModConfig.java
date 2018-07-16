@@ -19,13 +19,13 @@ public class ModConfig
 	@Config.Comment("Show Entity name on debug screen for entity under cursor")
 	public static boolean entityDebug = true;
 
-	@Name("OreDict advanced tooltips")
-	@Config.Comment("Show OreDict entries on debug screen for Block under cursor")
+	@Name("OreDict debugging")
+	@Config.Comment("Show OreDict entries on advanced tooltips and debug screen for thing under cursor")
 	public static boolean oreDictDebug = true;
 	
-	@Name("OreDict advanced tooltips")
-	@Config.Comment("Show OreDict entries for ItemStack in advanced tooltips")
-	public static boolean oreDictTooltips = true;
+	@Name("Capabilities debugging")
+	@Config.Comment("Show capabilities on advanced tooltips and debug screen for thing under cursor")
+	public static boolean capabilitiesDebug = true;
 
 	/*
     @Name("Mod debugging")
