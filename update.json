@@ -1,10 +1,11 @@
 {
   "homepage": "https://github.com/Stormwind99/DaringDebug",
   "promos": {
-    "1.12.2-latest": "2.0.0",
-    "1.12.2-recommended": "2.0.0"
+    "1.12.2-latest": "2.0.1",
+    "1.12.2-recommended": "2.0.1"
   },
   "1.12.2": {
+    "2.0.1": "Defensive crash avoidance if oredict debug somehow queries empty stack",
     "2.0.0": "Added oreDict for Blocks. Added capability display (off by default due to expense) for ItemStack, TileEntity, Entity, World, Chunk.",
     "1.2.0": "Added Entity name to debug screen",
     "1.1.0": "Added oreDict list on advanced tooltips",
