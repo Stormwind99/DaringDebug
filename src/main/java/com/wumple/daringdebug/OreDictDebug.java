@@ -43,7 +43,7 @@ public class OreDictDebug
         if (event.getFlags().isAdvanced() && (ModConfig.oreDictDebug == true))
         {
             ItemStack stack = event.getItemStack();
-            int[] ids = OreDictionary.getOreIDs(stack);
+            int[] ids = ((stack != null) && !stack.isEmpty()) ? OreDictionary.getOreIDs(stack) : new int[0];
             if (ids.length > 0)
             {
                 event.getToolTip().add(new TextComponentTranslation("misc.daringdebug.tooltip.advanced.oredict.header", ids.length).getUnformattedText());
@@ -68,7 +68,8 @@ public class OreDictDebug
             BlockPos blockpos = (mc.objectMouseOver == null) ? null : mc.objectMouseOver.getBlockPos();
             Block block = (blockpos == null) ? null : mc.world.getBlockState(blockpos).getBlock();
 
-            int[] ids = (block != null) ? OreDictionary.getOreIDs(new ItemStack(block, 1)) : new int[0];
+            ItemStack stack = (block != null) ? new ItemStack(block, 1) : null;
+            int[] ids = ((stack != null) && !stack.isEmpty()) ? OreDictionary.getOreIDs(stack) : new int[0];
 
             String key = null;
             for (int id : ids)

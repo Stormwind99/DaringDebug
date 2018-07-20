@@ -1,7 +1,6 @@
 package com.wumple.daringdebug;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
