@@ -71,9 +71,10 @@ public class CapabilityDebug
         if (event.getFlags().isAdvanced() && (ModConfig.capabilitiesDebug == true))
         {
             ItemStack stack = event.getItemStack();
-            forEachCap(stack, name -> {event.getToolTip().add(new TextComponentTranslation("misc.daringdebug.tooltip.advanced.capability.entry", name).getUnformattedText());} );
+            forEachCap(stack, name -> {
+                event.getToolTip().add(new TextComponentTranslation("misc.daringdebug.tooltip.advanced.capability.entry", name).getUnformattedText());
+            });
         }
-
     }
 
     public static void addCapTileEntityDebug(RenderGameOverlayEvent.Text event)
@@ -89,7 +90,7 @@ public class CapabilityDebug
 
     public static void addCapChunkDebug(RenderGameOverlayEvent.Text event)
     {
-        Chunk chunk = mc.world.getChunkFromBlockCoords(mc.player.getPosition());
+        Chunk chunk = mc.world.getChunk(mc.player.getPosition());
         addCapsToDebugScreen(chunk, "misc.daringdebug.debug.capabilities.chunk", event);
     }
 
@@ -110,9 +111,9 @@ public class CapabilityDebug
 
     protected static void addCapsToDebugScreen(ICapabilityProvider stack, String lockey, RenderGameOverlayEvent.Text event)
     {
-        forEachCap(stack, name -> event.getRight().add(I18n.format(lockey, name)) );
+        forEachCap(stack, name -> event.getRight().add(I18n.format(lockey, name)));
     }
-    
+
     @SuppressWarnings("unchecked")
     protected static void forEachCap(ICapabilityProvider stack, Consumer<String> block)
     {
@@ -131,10 +132,10 @@ public class CapabilityDebug
 
                         // check null + 6 actual facings
                         EnumFacing[] nullfacing = { null };
-                        EnumFacing[] facings = ObjectArrays.concat(nullfacing, EnumFacing.VALUES, EnumFacing.class); 
+                        EnumFacing[] facings = ObjectArrays.concat(nullfacing, EnumFacing.VALUES, EnumFacing.class);
 
                         String facingsString = null;
-                        
+
                         // iterate through all facings, checking for cap from each one
                         for (EnumFacing facing : facings)
                         {
@@ -145,18 +146,19 @@ public class CapabilityDebug
                                 {
                                     facingsString = new String();
                                 }
-                                
+
                                 if (facing == null)
                                 {
                                     facingsString += "0";
                                 }
                                 else
                                 {
-                                    facingsString += facing.getName2().charAt(0);;
-                                }                        
+                                    facingsString += facing.getName2().charAt(0);
+                                    ;
+                                }
                             }
                         }
-                        
+
                         // if any facing had the cap, then do it
                         if (facingsString != null)
                         {
