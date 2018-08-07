@@ -62,7 +62,6 @@ public class OreDictDebug
      */
     public static void addOreDictBlockDebug(RenderGameOverlayEvent.Text e)
     {
-        // tile entity
         if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK && mc.objectMouseOver.getBlockPos() != null)
         {
             BlockPos blockpos = (mc.objectMouseOver == null) ? null : mc.objectMouseOver.getBlockPos();
