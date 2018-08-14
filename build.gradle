@@ -90,10 +90,15 @@ apply from: 'dependencies.gradle'
 // Default repositories and publishing
 
 repositories {
+    // see https://authors.curseforge.com/docs/api
     maven {
         name = "CurseForge"
         url = "https://minecraft.curseforge.com/api/maven/"
     }
+   //maven {
+   //    name = "mc"
+   //    url = "https://libraries.minecraft.net/"
+   //}
 }
 
 allprojects {
@@ -113,8 +118,16 @@ publishing {
             version = config.version
 
             from components.java
+            artifact sourceJar
         }
     }
+}
+
+// bug workarounds with bad uploads, unsigned jars uploaded
+// see https://github.com/matthewprenger/CurseGradle/issues/14
+publishToMavenLocal {
+    dependsOn build
+    dependsOn publish
 }
 
 /// CurseGradle
@@ -200,8 +213,6 @@ bintray {
     }
 }
 
-/// Uploads
-
 // upload built mod and/or artifacts to all release/artifact locations
 task uploadAll {
     group 'upload'
@@ -249,7 +260,7 @@ processResources {
 jar {
     classifier = ""
     //rename the default output, for some better sanity with scripts
-    archiveName = "${baseName}-${minecraft.version}-${version}.${extension}"
+    archiveName = getArchiveName(baseName, version, extension)
 
     exclude "**/*.bat"
     exclude "**/*.psd"
@@ -264,28 +275,8 @@ jar {
 	)
 }
 
-task deobfJar(type: Jar) {
-    classifier = "dev"
-
-    //rename the default output, for some better sanity with scripts
-    archiveName = "${baseName}-${minecraft.version}-${version}-${classifier}.${extension}"
-
-    exclude "**/*.bat"
-    exclude "**/*.psd"
-    exclude "**/*.exe"
-
-    from sourceSets.main.output
-    from "LICENSE"
-     
-    manifest.mainAttributes(
-        "Implementation-Title": config.mod.name,
-        "Implementation-Version": project.version,
-        "Built-On": project.minecraft.version
-        )
-}
-
 artifacts {
-    archives deobfJar
+//    archives deobfJar
     archives jar
 }
 
@@ -313,10 +304,18 @@ def getChangeInfo() {
     return info
 }
 
+def getArchiveName(baseName, version, extension) {
+    return new String("${baseName}-${minecraft.version}-${version}.${extension}")
+}
+
+def getArchiveName() {
+    return getArchiveName(config.mod_id, config.version, "jar")
+}
+
 // build our own archive path that is relative and unix-format
 // since jar.archivePath is Windows format absolute path and github plugin makes ugly Github release asset file name from it
 def getArchivePath() {
-    return new String("build/libs/${jar.archiveName}")
+    return new String("build/libs/"+getArchiveName())
 }
 
 // --------------------------------------------------------------------------
@@ -413,7 +412,8 @@ task signJar(type: SignJar, dependsOn: reobfJar) {
     outputFile = jar.archivePath
 }
 
-task reviewSignJar(type:Exec) {
+// Use jarsigner to manually examine that jar is signed
+task reviewSignJar(type: Exec) {
     onlyIf {
         project.hasProperty('keyStore')
     }
@@ -424,6 +424,16 @@ task reviewSignJar(type:Exec) {
 // --------------------------------------------------------------------------
 // Misc
 
+// delete lots of directories where bugs cause old dependencies and files to be used
+task superClean(type: Delete) {
+    outputs.upToDateWhen { false }
+    delete ".classpath", ".project", ".settings", "bin", "build"
+    // Prevented by .gradle\4.9\fileContent\fileContent.lock
+    // delete ".gradle"
+}
+
+tasks.superClean.dependsOn clean
+
 // force runClient to always run when requested - never UP-TO-DATE
 runClient.outputs.upToDateWhen { false }
 
@@ -432,5 +442,13 @@ build {
     dependsOn 'signJar'
     dependsOn 'saveBuildNumber'
 }
+
+// make build tasks run before publish, otherwise could upload MCP mapped jar instead of SRG mapped jar!
+tasks.publish.dependsOn build
+tasks.publishMavenPublicationToMavenLocal.dependsOn build
+tasks.publishMavenPublicationToMavenLocal.dependsOn publish
+tasks.githubRelease.dependsOn build
+tasks.bintrayUpload.dependsOn build
+tasks.curseforge.dependsOn build
 
 defaultTasks 'build'
