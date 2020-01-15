@@ -3,55 +3,43 @@ package com.wumple.daringdebug;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLFingerprintViolationEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, dependencies = Reference.DEPENDENCIES, updateJSON = Reference.UPDATEJSON, certificateFingerprint=Reference.FINGERPRINT, canBeDeactivated=true, clientSideOnly = true, acceptedMinecraftVersions = "[1.12,1.12.2]")
+@Mod(Reference.MOD_ID)
 public class DaringDebug
 {
-    @Mod.Instance(Reference.MOD_ID)
-    public static DaringDebug instance;
-    
-    @SidedProxy(clientSide = "com.wumple.daringdebug.ClientProxy", serverSide = "com.wumple.daringdebug.ServerProxy")
-    public static ISidedProxy proxy;
+	public static Logger logger;
+	
+	public Logger getLogger()
+	{
+		return LogManager.getLogger(Reference.MOD_ID);
+	}
 
-    public static Logger logger;
+	public DaringDebug()
+	{
+		ConfigManager.register(ModLoadingContext.get());
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event)
-    {
-        logger = event.getModLog();
-        proxy.preInit(event);
-    }
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 
-    @EventHandler
-    public void init(FMLInitializationEvent event) 
-    {
-    	proxy.init(event);
-    }
+		// Register ourselves for server and other game events we are interested in
+		MinecraftForge.EVENT_BUS.register(this);
+	}
 
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent event)
-    {
-    	proxy.postInit(event);
-    }
+	public void setup(final FMLCommonSetupEvent event)
+	{
+	}
 
-    @EventHandler
-    public void onFingerprintViolation(FMLFingerprintViolationEvent event)
-    {
-        if (logger == null)
-        {
-            logger = LogManager.getLogger(Reference.MOD_ID);
-        }
-        if (logger != null)
-        {
-            logger.warn("Invalid fingerprint detected! The file " + event.getSource().getName() + " may have been tampered with. This version will NOT be supported by the author!");
-            logger.warn("Expected " + event.getExpectedFingerprint() + " found " + event.getFingerprints().toString());
-        }
-    }
+	@SubscribeEvent
+	public void onFingerprintViolation(final FMLFingerprintViolationEvent event)
+	{
+		getLogger().warn("Invalid fingerprint detected! The file " + event.getSource().getName()
+				+ " may have been tampered with. This version will NOT be supported by the author!");
+		getLogger().warn("Expected " + event.getExpectedFingerprint() + " found " + event.getFingerprints().toString());
+	}
 }

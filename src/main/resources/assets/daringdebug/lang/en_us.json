@@ -1,0 +1,12 @@
+{
+    "language": "English",
+    "misc.daringdebug.debug.title": "§nDaring Debug",
+    "misc.daringdebug.debug.tileentity": "TileEntity: %s",
+    "misc.daringdebug.tooltip.advanced.tags.header": "Tags: %s",
+    "misc.daringdebug.tooltip.advanced.tags.entry": "§6#%s§r",
+    "misc.daringdebug.tooltip.advanced.capability.entry": "ICap: %s",
+    "misc.daringdebug.debug.capabilities.tileentity": "TCap: %s",
+    "misc.daringdebug.debug.capabilities.entity": "ECap: %s",
+    "misc.daringdebug.debug.capabilities.chunk": "CCap: %s",
+    "misc.daringdebug.debug.capabilities.world": "WCap: %s"
+}

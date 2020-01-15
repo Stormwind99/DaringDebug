@@ -1,1 +1,0 @@
-git checkout dependencies.gradle private.properties.example src/main/java/com/wumple/daringdebug/DaringDebug.java src/main/java/com/wumple/daringdebug/Reference.java src/resources/assets/daringdebug/lang/en_us.lang src/resources/mcmod.info src/resources/pack.mcmeta
