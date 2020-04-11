@@ -33,7 +33,7 @@ public class EntityDebug
         // tile entity
         if (mc.objectMouseOver != null && mc.objectMouseOver.getType() == RayTraceResult.Type.BLOCK)
         {
-        	final BlockRayTraceResult rayTraceResult = (BlockRayTraceResult) mc.objectMouseOver;
+            final BlockRayTraceResult rayTraceResult = (BlockRayTraceResult) mc.objectMouseOver;
             BlockPos blockpos = rayTraceResult.getPos();
             
             TileEntity te = (blockpos == null) ? null : mc.world.getTileEntity(blockpos);
